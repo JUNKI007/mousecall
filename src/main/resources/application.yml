@@ -1,16 +1,18 @@
 spring:
   application:
     name: mousecall
+    profile :
+      active : dev
 
   datasource:
-    url: jdbc:mysql://localhost:3306/mousecall?serverTimezone=Asia/Seoul&useSSL=false
+    url: jdbc:mysql://localhost:3306/test?serverTimezone=Asia/Seoul&useSSL=false
     username: root
     password: 1q2w3e4r!!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update # ?? ??? update, ?? ??? validate or none
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -31,3 +33,10 @@ spring:
 
 server:
   port: 8080
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  api-docs:
+    enabled: true

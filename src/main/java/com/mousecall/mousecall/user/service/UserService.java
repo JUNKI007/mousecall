@@ -1,6 +1,8 @@
 package com.mousecall.mousecall.user.service;
 
 
+import com.mousecall.mousecall.auth.dto.LoginRequest;
+import com.mousecall.mousecall.auth.token.JwtTokenProvider;
 import com.mousecall.mousecall.user.domain.User;
 import com.mousecall.mousecall.user.dto.UserJoinRequest;
 import com.mousecall.mousecall.user.repository.UserRepository;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public void register(UserJoinRequest userJoinRequest){
@@ -28,5 +31,18 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public String login(LoginRequest loginRequest){
+        User user = userRepository.findByUsername(loginRequest.getUsername());
+
+        if(user == null){
+            throw new IllegalArgumentException("존재하지 않는 유저입니다.");
+        }
+
+        if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return jwtTokenProvider.createToken(user.getUsername(), user.getRole());
+    }
 
 }
