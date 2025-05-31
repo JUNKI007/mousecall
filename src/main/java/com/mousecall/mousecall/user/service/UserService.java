@@ -31,6 +31,20 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void registerAdmin(UserJoinRequest userJoinRequest){
+        if (userRepository.existsByUsername(userJoinRequest.getUsername())) {
+            throw new IllegalArgumentException("이미 존재하는 유저입니다.");
+        }
+
+        User user = User.builder()
+                .username(userJoinRequest.getUsername())
+                .password(userJoinRequest.getPassword())
+                .role("ADMIN")
+                .build();
+
+        userRepository.save(user);
+    }
+
     public String login(LoginRequest loginRequest){
         User user = userRepository.findByUsername(loginRequest.getUsername());
 

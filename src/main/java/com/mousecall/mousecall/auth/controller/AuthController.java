@@ -25,6 +25,12 @@ public class AuthController {
         return new ResponseEntity<>("회원가입 성공", HttpStatus.CREATED);
     }
 
+    @PostMapping("/register-admin")
+    public ResponseEntity<String> registerAdmin(@RequestBody UserJoinRequest request){
+        userService.registerAdmin(request);
+        return new ResponseEntity<>("관리자 회원가입 성공", HttpStatus.CREATED);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest request){
         String token = userService.login(request);
