@@ -3,6 +3,7 @@ package com.mousecall.mousecall.complaint.controller;
 import com.mousecall.mousecall.auth.token.JwtTokenProvider;
 import com.mousecall.mousecall.complaint.dto.ComplaintCreateRequest;
 import com.mousecall.mousecall.complaint.dto.ComplaintResponse;
+import com.mousecall.mousecall.complaint.dto.ComplaintUpdateRequest;
 import com.mousecall.mousecall.complaint.service.ComplaintService;
 import com.mousecall.mousecall.user.domain.User;
 import com.mousecall.mousecall.user.repository.UserRepository;
@@ -61,4 +62,27 @@ public class ComplaintController {
         return ResponseEntity.ok(complaintService.getAllComplaints(page, size));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ComplaintResponse> getComplaintsById(@PathVariable Long id,
+                                                               @RequestHeader("Authorization") String bearerToken){
+
+        String username = jwtTokenProvider.getUsername(bearerToken.substring(7));
+        User user = userRepository.findByUsername(username);
+
+        return ResponseEntity.ok(complaintService.getComplaintById(id, user));
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ComplaintResponse> updateComplaint(
+            @PathVariable Long id,
+            @RequestBody ComplaintUpdateRequest request,
+            @RequestHeader("Authorization") String bearerToken
+    ) {
+        String username = jwtTokenProvider.getUsername(bearerToken.substring(7));
+        User user = userRepository.findByUsername(username);
+
+        ComplaintResponse response = complaintService.updateComplaint(id, request, user);
+        return ResponseEntity.ok(response);
+    }
 }
