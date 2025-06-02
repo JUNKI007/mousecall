@@ -75,4 +75,19 @@ public class ComplaintService {
         complaint.updateContent(complaintUpdateRequest.getContent());
         return new ComplaintResponse(complaint);
     }
+
+    // 민원 삭제
+    public void deleteComplaint(Long id, User user) {
+        Complaint complaint = complaintRepository.findById(id)
+                .orElseThrow(() -> new ComplaintNotFoundException(id));
+
+        boolean isOwner = complaint.getUser().getUsername().equals(user.getUsername());
+
+        if (!isOwner) {
+            throw new SecurityException("본인의 민원만 삭제할 수 있습니다.");
+        }
+
+        complaintRepository.delete(complaint);
+    }
+
 }

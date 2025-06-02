@@ -85,4 +85,16 @@ public class ComplaintController {
         ComplaintResponse response = complaintService.updateComplaint(id, request, user);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteComplaint(@PathVariable Long id,
+                                                  @RequestHeader("Authorization") String bearerToken) {
+        String username = jwtTokenProvider.getUsername(bearerToken.substring(7));
+        User user = userRepository.findByUsername(username);
+
+        complaintService.deleteComplaint(id, user);
+
+        return ResponseEntity.ok("민원이 성공적으로 삭제되었습니다.");
+    }
 }
+
