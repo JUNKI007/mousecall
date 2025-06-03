@@ -3,6 +3,7 @@ package com.mousecall.mousecall.user.service;
 
 import com.mousecall.mousecall.auth.dto.LoginRequest;
 import com.mousecall.mousecall.auth.token.JwtTokenProvider;
+import com.mousecall.mousecall.exception.DuplicateUserException;
 import com.mousecall.mousecall.user.domain.User;
 import com.mousecall.mousecall.user.dto.UserJoinRequest;
 import com.mousecall.mousecall.user.repository.UserRepository;
@@ -19,7 +20,7 @@ public class UserService {
 
     public void register(UserJoinRequest userJoinRequest){
         if (userRepository.existsByUsername(userJoinRequest.getUsername())) {
-            throw new IllegalArgumentException("이미 존재하는 유저입니다.");
+            throw new DuplicateUserException("이미 존재하는 유저입니다.");
         }
 
         User user = User.builder()
@@ -33,7 +34,7 @@ public class UserService {
 
     public void registerAdmin(UserJoinRequest userJoinRequest){
         if (userRepository.existsByUsername(userJoinRequest.getUsername())) {
-            throw new IllegalArgumentException("이미 존재하는 유저입니다.");
+            throw new DuplicateUserException("이미 존재하는 유저입니다.");
         }
 
         User user = User.builder()

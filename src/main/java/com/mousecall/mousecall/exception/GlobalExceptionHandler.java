@@ -8,6 +8,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(DuplicateUserException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateUser(DuplicateUserException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT) // 409
+                .body(new ErrorResponse("409", e.getMessage()));
+    }
+
     @ExceptionHandler(ComplaintNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleComplaintNotFound(ComplaintNotFoundException e) {
         return ResponseEntity

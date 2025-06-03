@@ -1,6 +1,9 @@
 package com.mousecall.mousecall.complaint.service;
 
+import com.mousecall.mousecall.attachment.domain.Attachment;
+import com.mousecall.mousecall.attachment.service.FileService;
 import com.mousecall.mousecall.complaint.domain.Complaint;
+import com.mousecall.mousecall.complaint.domain.ComplaintStatus;
 import com.mousecall.mousecall.complaint.dto.ComplaintCreateRequest;
 import com.mousecall.mousecall.complaint.dto.ComplaintResponse;
 import com.mousecall.mousecall.complaint.dto.ComplaintUpdateRequest;
@@ -12,25 +15,52 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ComplaintService {
     private final ComplaintRepository complaintRepository;
+    private final FileService fileService;
 
 
 
     // 민원 생성
-    public void createComplaints(ComplaintCreateRequest complaintCreateRequest, User user){
+    public void createComplaints(ComplaintCreateRequest request, User user, List<MultipartFile> files) throws IOException {
         Complaint complaint = Complaint.builder()
-                .title(complaintCreateRequest.getTitle())
-                .content(complaintCreateRequest.getContent())
+                .title(request.getTitle())
+                .content(request.getContent())
+                .status(ComplaintStatus.WAITING)
                 .user(user)
                 .build();
+
+        if (files != null && !files.isEmpty()) {
+            List<Attachment> attachments = files.stream().map(file -> {
+                try {
+                    String originalPath = fileService.saveOriginalFile(file);
+                    String thumbnailPath = fileService.generateThumbnail(originalPath);
+                    String watermarkPath = fileService.applyWatermark(originalPath);
+
+                    return Attachment.builder()
+                            .filePath(originalPath)
+                            .thumbnailPath(thumbnailPath)
+                            .watermarkPath(watermarkPath)
+                            .complaint(complaint)
+                            .build();
+                } catch (IOException e) {
+                    throw new RuntimeException("파일 처리 중 오류 발생", e);
+                }
+            }).toList();
+
+            complaint.updateAttachments(attachments);
+        }
+
         complaintRepository.save(complaint);
     }
+
 
     // user 1명이 작성한 민원리스트 조회
     public List<Complaint> getUserComplaint(User user){

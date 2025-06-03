@@ -13,7 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,16 +28,19 @@ public class ComplaintController {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    @PostMapping
-    public ResponseEntity<String> createComplaints(@RequestHeader("Authorization") String bearerToken,
-                                                   @RequestBody ComplaintCreateRequest dto){
-
-        // Bearer 라는 글자까지 자르고 그뒤(토큰값)을 사용하기 위해 substring 7
+    @PostMapping(value = "", consumes = {"multipart/form-data"})
+    public ResponseEntity<String> createComplaintWithFiles(
+            @RequestHeader("Authorization") String bearerToken,
+            @RequestPart("data") ComplaintCreateRequest dto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) throws IOException {
         String username = jwtTokenProvider.getUsername(bearerToken.substring(7));
         User user = userRepository.findByUsername(username);
-        complaintService.createComplaints(dto, user);
-        return ResponseEntity.ok("민원 작성 완료");
+
+        complaintService.createComplaints(dto, user, files);
+        return ResponseEntity.ok("민원과 첨부파일이 저장되었습니다.");
     }
+
 
 
     // 성능고려 : 한 유저가 갖는 민원의 수는 많지 않아 오버헤드는 아주 작기때문에 stream 방식으로 조회

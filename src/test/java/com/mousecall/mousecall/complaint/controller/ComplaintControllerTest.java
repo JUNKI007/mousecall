@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class ComplaintControllerTest {
@@ -36,23 +37,28 @@ class ComplaintControllerTest {
     private ComplaintController complaintController;
 
     @Test
-    void createComplaints_WithValidToken_ReturnsSuccessMessage() {
+    void createComplaints_WithFilesAndValidToken_ReturnsSuccessMessage() throws Exception {
         // given
         String token = "Bearer test.token";
         String username = "user1";
         ComplaintCreateRequest request = new ComplaintCreateRequest("title", "content");
         User user = User.builder().username(username).build();
 
+        MultipartFile file1 = mock(MultipartFile.class);
+        MultipartFile file2 = mock(MultipartFile.class);
+        List<MultipartFile> files = List.of(file1, file2);
+
         when(jwtTokenProvider.getUsername("test.token")).thenReturn(username);
         when(userRepository.findByUsername(username)).thenReturn(user);
 
         // when
-        ResponseEntity<String> response = complaintController.createComplaints(token, request);
+        ResponseEntity<String> response = complaintController.createComplaintWithFiles(token, request, files);
 
         // then
         assertEquals("민원 작성 완료", response.getBody());
-        verify(complaintService).createComplaints(request, user);
+        verify(complaintService).createComplaints(request, user, files);
     }
+
 
     @Test
     void getMyComplaints_WithValidToken_ReturnsComplaintList() {
